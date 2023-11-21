@@ -1,4 +1,5 @@
 mod egui_persistence;
+mod undo_plugin;
 
 use std::any::TypeId;
 
@@ -18,6 +19,7 @@ use egui_dock::{DockArea, DockState, NodeIndex, Style};
 use egui_gizmo::{Gizmo, GizmoMode, GizmoOrientation};
 
 use self::egui_persistence::EguiPersistence;
+use self::undo_plugin::UndoPlugin;
 
 pub struct UiPlugin;
 
@@ -26,6 +28,7 @@ impl Plugin for UiPlugin {
         app.add_plugins(DefaultInspectorConfigPlugin)
             .add_plugins(bevy_egui::EguiPlugin)
             .add_plugins(EguiPersistence)
+            .add_plugins(UndoPlugin)
             .insert_resource(UiState::new())
             .add_systems(
                 PostUpdate,
