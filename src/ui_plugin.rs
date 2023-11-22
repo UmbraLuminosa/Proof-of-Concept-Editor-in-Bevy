@@ -1,3 +1,4 @@
+mod bevy_ui_plugin;
 mod egui_persistence;
 mod undo_plugin;
 
@@ -18,6 +19,7 @@ use bevy_window::PrimaryWindow;
 use egui_dock::{DockArea, DockState, NodeIndex, Style};
 use egui_gizmo::{Gizmo, GizmoMode, GizmoOrientation};
 
+// use self::bevy_ui_plugin::BevyUiPlugin;
 use self::egui_persistence::EguiPersistence;
 use self::undo_plugin::UndoPlugin;
 
@@ -28,6 +30,7 @@ impl Plugin for UiPlugin {
         app.add_plugins(DefaultInspectorConfigPlugin)
             .add_plugins(bevy_egui::EguiPlugin)
             .add_plugins(EguiPersistence)
+            // .add_plugins(BevyUiPlugin)
             .add_plugins(UndoPlugin)
             .insert_resource(UiState::new())
             .add_systems(
@@ -103,10 +106,10 @@ enum InspectorSelection {
 }
 
 #[derive(Resource)]
-struct UiState {
+pub struct UiState {
     state: DockState<EguiWindow>,
     viewport_rect: egui::Rect,
-    selected_entities: SelectedEntities,
+    pub selected_entities: SelectedEntities,
     selection: InspectorSelection,
     gizmo_mode: GizmoMode,
 }

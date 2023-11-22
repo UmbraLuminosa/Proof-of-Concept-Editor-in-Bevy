@@ -20,6 +20,7 @@ pub struct MainWindowConfig {
     pub width: u32,
     pub height: u32,
     pub maximized: bool,
+    pub scale_factor: f64,
 }
 
 fn restore_window_state(mut primary_window: Query<&mut Window, With<PrimaryWindow>>) {
@@ -31,7 +32,10 @@ fn restore_window_state(mut primary_window: Query<&mut Window, With<PrimaryWindo
     };
 
     println!("Loaded window config file");
-    window.resolution = WindowResolution::new(config.width as f32, config.height as f32);
+    window.resolution = WindowResolution::new(
+        config.width as f32 / config.scale_factor as f32,
+        config.height as f32 / config.scale_factor as f32,
+    );
     window.mode = config.mode;
     window.position = config.position;
     window.set_maximized(config.maximized);
@@ -73,6 +77,7 @@ fn save_window_state(window: &Window, maximized: bool) {
         position: window.position.clone(),
         width: window.physical_width(),
         height: window.physical_height(),
+        scale_factor: window.resolution.base_scale_factor(),
         maximized,
     };
 

@@ -39,6 +39,11 @@ serde = "1.0"
 serde_json = "1.0"
 directories = "5.0.1"
 ron = "0.8.1"
+bevy_mod_picking = { version = "0.17", features = [
+    "backend_raycast",
+    "backend_egui",
+    "backend_bevy_ui",
+] }
 
 [workspace]
 resolver = "2" # Important! wgpu/Bevy needs this!

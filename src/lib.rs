@@ -1,5 +1,12 @@
 use bevy::prelude::*;
-use ui_plugin::{MainCamera, UiPlugin};
+use bevy_mod_picking::{
+    events::{Click, Pointer},
+    picking_core::Pickable,
+    prelude::EntityEvent,
+    selection::Deselect,
+    *,
+};
+use ui_plugin::{MainCamera, UiPlugin, UiState};
 use window_persistence::WindowPersistencePlugin;
 
 pub mod file_io;
@@ -20,9 +27,45 @@ impl Plugin for GameEditorPlugin {
         }))
         .add_plugins(UiPlugin)
         .add_plugins(WindowPersistencePlugin)
+        .add_plugins(DefaultPickingPlugins)
         .add_systems(Startup, setup)
+        .add_systems(Update, auto_add_raycast_target)
+        .add_systems(Update, handle_pick_events)
         .register_type::<Option<Handle<Image>>>()
         .register_type::<AlphaMode>();
+    }
+}
+
+fn auto_add_raycast_target(
+    mut commands: Commands,
+    query: Query<Entity, (Without<Pickable>, With<Handle<Mesh>>)>,
+) {
+    for entity in &query {
+        commands.entity(entity).insert(PickableBundle::default());
+    }
+}
+
+fn handle_pick_events(
+    mut ui_state: ResMut<UiState>,
+    mut click_events: EventReader<Pointer<Click>>,
+    mut deselect_events: EventReader<Pointer<Deselect>>,
+    input: Res<Input<KeyCode>>,
+) {
+    for click in click_events.read() {
+        let do_add = input.any_pressed([
+            KeyCode::ControlLeft,
+            KeyCode::ControlRight,
+            KeyCode::ShiftLeft,
+            KeyCode::ShiftRight,
+        ]);
+
+        ui_state
+            .selected_entities
+            .select_maybe_add(click.target(), do_add);
+    }
+
+    for _ in deselect_events.read() {
+        ui_state.selected_entities.clear();
     }
 }
 
@@ -157,11 +200,16 @@ fn setup(
     // camera
     commands.spawn((
         Camera3dBundle {
+            camera: Camera {
+                order: 0,
+                ..default()
+            },
             transform: Transform::from_xyz(0.0, box_offset, 4.0)
                 .looking_at(Vec3::new(0.0, box_offset, 0.0), Vec3::Y),
             ..Default::default()
         },
         MainCamera,
+        UiCameraConfig { show_ui: false },
         // PickRaycastSource,
     ));
 }
